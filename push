@@ -43,6 +43,7 @@ const push = async (deviceToken, message, production, voip) => {
     title: 'Title from manual test service',
     body: 'Body from manual test service',
   }
+  // TODO: Custom your payload here!
   deviceNoti.payload = (() => {
     switch(message) {
     case 'logout':
