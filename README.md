@@ -39,7 +39,13 @@ For general instruction
 ./push --help
 ```
 
-For pushing to specific device
+ํYou can check your configuration by running: 
+
+```bash
+./push validate
+```
+
+For pushing to specific device:
 
 ```bash
 ./push device <your_device_id>
