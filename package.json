@@ -1,0 +1,25 @@
+{
+  "name": "apn-potato",
+  "version": "1.0.0",
+  "description": "Sending push notification using APN",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peatiscoding/apn-potato.git"
+  },
+  "keywords": [
+    "apn"
+  ],
+  "author": "Kittiphat S",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/peatiscoding/apn-potato/issues"
+  },
+  "homepage": "https://github.com/peatiscoding/apn-potato#readme",
+  "dependencies": {
+    "apn": "^2.2.0"
+  }
+}
