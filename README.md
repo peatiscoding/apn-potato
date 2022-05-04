@@ -2,6 +2,10 @@
 
 Using the APN to run the APN push manually.
 
+Would like to create a push notification to your device to test your iOS implementation without the help from Server Side? This project is just to help you with that! Simulate server side's push notfication here.
+
+Example use case: Let's say you have VoIP app that need the server side push to wake your app. But your server doesn't have staging option setup and you need to ease your development cycle by simluate this on your own..
+
 ## Setup
 
 1. Checkout this code.
