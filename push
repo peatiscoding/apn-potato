@@ -1,0 +1,124 @@
+#!/usr/bin/env node
+
+// boilerplate stuff
+const yargs = require('yargs/yargs')
+const apn = require('apn')
+const { existsSync } = require('fs')
+const { hideBin } = require('yargs/helpers')
+
+/**
+ * 
+ * @param {string} deviceToken
+ * @returns {Promise<void>}
+ */
+const push = async (deviceToken, message, production, voip) => {
+  const config = validateConfig()
+  const topic = [`${config.bundleId}`, voip ? '.voip' : '' ].join('')
+  const verbose = [
+    'PUSH TO:',
+    `voip: ${Boolean(voip) ? 'Y' : 'N'}`,
+    `prod: ${Boolean(production) ? 'Y' : 'N'}`,
+    `keyId: ${config.keyId}`,
+    `teamId: ${config.teamId}`,
+    `DEVICE: ${deviceToken}`,
+    'RESOLVED:',
+    `topic: ${topic}`,
+  ]
+  console.log(verbose.join('\n'))
+  const providerOpts = {
+    token: {
+      key: config.keyPath,
+      keyId: config.keyId,
+      teamId: config.teamId,
+    },
+    production: production,
+  }
+  const provider = new apn.Provider(providerOpts)
+  const deviceNoti = new apn.Notification()
+  deviceNoti.expiry = Math.floor(Date.now() / 1000) + 3600
+  deviceNoti.topic = topic
+  deviceNoti.priority = 10
+
+  deviceNoti.alert = {
+    title: 'Title from manual test service',
+    body: 'Body from manual test service',
+  }
+  deviceNoti.payload = (() => {
+    switch(message) {
+    case 'logout':
+      return { type: 'logout' }
+    case 'force_logout':
+      return { type: 'force_logout' }
+    default:
+      return {
+        type: 'call',
+        params: 'from_phone_no=60005'
+      }
+    }
+  })()
+
+  const deviceResult = await provider.send(deviceNoti, [deviceToken])
+  console.log('Output', JSON.stringify(deviceResult))
+}
+
+/**
+ * Validate and retrieve configurations
+ * @returns {{
+ *    bundleId: string,
+ *    teamId: string,
+ *    keyId: string,
+ *    keyPath: string,
+ * }}
+ */
+const validateConfig = () => {
+  // config
+  const config = require('./config.json')
+  const keysToValidate = {
+    keyId: { validation: Boolean, error: `keyId is required.` },
+    bundleId: { validation: (v) => /\w\./i, error: `bundleId is required example: "com.example.dev"` },
+    keyPath: { validation: (v) => existsSync(v), error: `keyPath must be valid and exists.` },
+    teamId: { validation: (v) => typeof v === 'string' && /^[A-Z0-9]{10}$/.test(v), error: `teamId must be valid (10 alphanumeric all caps) and is string.` }
+  }
+  for(const k in keysToValidate) {
+    const { validation, error } = keysToValidate[k]
+    if (!validation(config[k])) {
+      throw new Error(`${error}. got ${config[k]}`)
+    }
+  }
+  return config
+}
+
+yargs(hideBin(process.argv))
+  .command('device [deviceToken] [message]', 'push to specific device', (yargs) => {
+    return yargs
+      .positional('deviceToken', {
+        describe: 'Device Token received from Client when launching the iOS App',
+      })
+      .positional('message', {
+        describe: 'Optionally specific the message to push through. Default is none',
+      })
+  }, async (argv) => {
+    await push(argv.deviceToken, argv.message, argv.prod, argv.voip)
+    process.exit()
+  })
+  .command('validate', 'validate your configurations', () => {
+    // Validate configurations
+    try {
+      validateConfig()
+      console.log('Looks good!')
+    } catch (e) {
+      console.error(e && e.message)
+    }
+  })
+  .option('prod', {
+    type: 'boolean',
+    default: false,
+    description: 'Run against production target instead.',
+  })
+  .option('voip', {
+    type: 'boolean',
+    default: true,
+    description: 'push to voip topic [default], --voip 0 to push to normal topic'
+  })
+  .demandCommand(1)
+  .parse()
