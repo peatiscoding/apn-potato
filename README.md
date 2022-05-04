@@ -22,3 +22,41 @@ teamId that you use to run the app.|`X38DFXXD`
 And your iOS device.|-
 
 Create this to `config.json` file located in root folder. See `config.example.json`
+
+finally make sure `push` script is ready to run.
+
+```bash
+chmod +x ./push
+```
+
+## Usage
+
+To use it:
+
+For general instruction
+
+```bash
+./push --help
+```
+
+For pushing to specific device
+
+```bash
+./push device <your_device_id>
+```
+
+## Advance usage
+
+By default it will push to Staging APN server (produciton = false) override that with
+
+```bash
+./push device <your_device_id> --prod true
+```
+
+Or if you wish to push the device to non `voip` topic. use `--voip false` to push the notification to normal topic.
+
+```bash
+./push device <your_device_id> --voip false
+```
+
+You may also customise the notification in `push` script as well. By supplying message which will select the message of push content in the function defined within.
